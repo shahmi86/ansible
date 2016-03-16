@@ -11,13 +11,13 @@
       region: "ap-southeast-1"
       inst_name: "testingname"
       serv_env: "Development"
-      serv_types: "General"
+      serv_class: "General"
   tasks:
     - name: Create Instance (Debian 8 HVM)
       ec2: image={{ image }}
            instance_type={{ instance_type }}
            keypair={{ keypair }}
-           instance_tags='{"Name":"{{ inst_name }}","Environment":"{{ serv_env }}","Types":"{{ serv_types}}"}'
+           instance_tags='{"Name":"{{ inst_name }}","Environment":"{{ serv_env }}","Class":"{{ serv_class}}"}'
            region={{ region }}
            group={{ group }}
            wait=true
