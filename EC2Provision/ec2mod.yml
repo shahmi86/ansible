@@ -1,0 +1,30 @@
+--- # Create ec2 instance playbook
+
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+      keypair: ""
+      instance_type: "t2.nano"
+      image: "ami-effa328c"
+      group: "sgpuppetmaster"
+      region: "ap-southeast-1"
+      inst_name: "testingname"
+  tasks:
+    - name: Create Instance (Debian 8 HVM)
+      ec2: image={{ image }}
+           instance_type={{ instance_type }}
+           keypair={{ keypair }}
+           instance_tags='{"Name":"{{ inst_name }}"}'
+           region={{ region }}
+           group={{ group }}
+           wait=true
+      register: ec2_info
+
+    - name: Add instances to host group
+      add_host: hostname={{ item.public_ip }} groupname=ec2hosts
+      with_items: ec2_info.instances
+
+    - name: Wait for SSH to come up
+      wait_for: host={{ item.public_dns_name }} port=22 delay=60 timeout=320 state=started
+      with_items: ec2_info.instances
