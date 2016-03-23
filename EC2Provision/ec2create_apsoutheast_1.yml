@@ -45,7 +45,6 @@
           done
           exit 1
            wait=true
-	   wait_timeout = 600
       register: ec2_info
 
     - name: Add instances to host group
