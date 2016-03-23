@@ -3,22 +3,20 @@
 - hosts: localhost
   connection: local
   gather_facts: false
+  vars_prompt:
+    inst_name: "What's the name of the instance?"
   vars:
-      keypair: ""
-      instance_type: "t2.nano"
-      image: "ami-effa328c"
-      group: "sgpuppetmaster"
-      region: "ap-southeast-1"
-      inst_name: "testingname"
-      serv_env: "Development"
-      serv_class: "General"
-      provisionby: "Ansible"
+      keypair: "your_keypair"
+      instance_type: "m1.small"
+      image: "ami-xxxyyyy"
+      group: "your_group"
+      region: "us-west-2"
   tasks:
-    - name: Create Instance (Debian 8 HVM)
+    - name: make one instance
       ec2: image={{ image }}
            instance_type={{ instance_type }}
            keypair={{ keypair }}
-           instance_tags='{"Name":"{{ inst_name }}","Environment":"{{ serv_env }}","Class":"{{ serv_class}}","Provision":"{{ provisionby }}"}'
+           instance_tags='{"Name":"{{ inst_name }}"}'
            region={{ region }}
            group={{ group }}
            wait=true
