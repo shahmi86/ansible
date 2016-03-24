@@ -31,3 +31,9 @@
     - name: Wait for SSH to come up
       wait_for: host={{ item.public_dns_name }} port=22 delay=60 timeout=320 state=started
       with_items: ec2_info.instances
+
+    
+    hosts: ec2hosts
+    tasks:
+    -name: Change with proper hostname according EC2 Tag Name
+     command: cat {{ inst_name }} > /etc/hostname
