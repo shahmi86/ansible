@@ -25,7 +25,7 @@
            region={{ region }}
            group={{ group }}
            volumes={{ disk_vols }}
-           assign_public_ip: yes
+           assign_public_ip=yes
            wait=true
       register: ec2_info
 
