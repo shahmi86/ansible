@@ -6,6 +6,7 @@
   gather_facts: false
   vars:
       keypair: ""
+      disk_vols: "10"
       instance_type: "t2.medium"
       image: "ami-55be6b36"
       group: "default"
@@ -23,6 +24,8 @@
            instance_tags='{"Name":"{{ inst_name }}","Environment":"{{ serv_env }}","Class":"{{ serv_class}}","Provision":"{{ provisionby }}"}'
            region={{ region }}
            group={{ group }}
+           volumes={{ disk_vols }}
+           assign_public_ip: yes
            wait=true
       register: ec2_info
 
@@ -31,5 +34,24 @@
       with_items: ec2.instances
 
     - name: Wait for SSH to come up
-      wait_for: host={{ item.public_dns_name }} port=22 delay=60 timeout=320 state=started
+      wait_for: host={{ item[ec2launch.check.ip] }} port=22 delay=60 timeout=320 state=started
       with_items: ec2.instances
+
+    - name: Associate Elastic IP to instances
+      ec2_eip:
+       region={{ region }}
+       in_vpc=yes
+       instance_id= {{ launched.instances[item.0].id }} 
+       ip= {{ item.1 }}
+      with_indexed_items: "{{ ec2launch.elastic_ips }}"
+      when: ec2launch.elastic_ips
+  
+    - name: Add launched instances to host group
+      add_host:
+      hostname: "{{ item.id }}.{{ ec2launch.inventory_group }}"
+      groupname: "{{ ec2launch.inventory_group }}"
+      ansible_ssh_host: "{{ item[ec2launch.check.ip] }}"
+      ansible_user: "{{ ec2launch.ansible_user }}"
+      ansible_ssh_private_key_file: "{{ ec2launch.ansible_key }}"
+ :   with_items: launched.instances
+
