@@ -1,7 +1,8 @@
 --- # Create ec2 instance playbook
-
-- hosts: localhost
+- name: Provision temporary dev server
+  hosts: localhost
   connection: local
+  tags: provision
   gather_facts: false
   vars:
       keypair: ""
@@ -13,6 +14,7 @@
       serv_env: "Development"
       serv_class: "General"
       provisionby: "Ansible"
+
   tasks:
     - name: Create Instance (Debian 8 HVM)
       ec2: image={{ image }}
@@ -21,6 +23,9 @@
            instance_tags='{"Name":"{{ inst_name }}","Environment":"{{ serv_env }}","Class":"{{ serv_class}}","Provision":"{{ provisionby }}"}'
            region={{ region }}
            group={{ group }}
+           user_data: | 
+            #!/bin/bash
+            echo '{{ inst_name }}' > /tmp/instancename
            wait=true
       register: ec2_info
 
