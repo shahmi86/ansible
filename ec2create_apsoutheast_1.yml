@@ -26,7 +26,6 @@
            instance_tags='{"Name":"{{ inst_name }}","Environment":"{{ serv_env }}","Class":"{{ serv_class}}","Provision":"{{ provisionby }}"}'
            region={{ region }}
            group={{ group }}
-           assign_public_ip=yes
            wait=true
       register: ec2_info
 
