@@ -6,7 +6,7 @@
   gather_facts: false
   vars:
       keypair: ""
-      disk_vols: "10"
+      disk_vols: "15"
       instance_type: "t2.medium"
       instance_ids: "i-45e2Ax"
       image: "ami-2c6e7e42"
@@ -20,6 +20,7 @@
   tasks:
     - name: Create Instance (Debian 8 HVM)
       ec2: image={{ image }}
+           instance_ids= {{ instance_ids }}
            instance_type={{ instance_type }}
            keypair={{ keypair }}
            instance_tags='{"Name":"{{ inst_name }}","Environment":"{{ serv_env }}","Class":"{{ serv_class}}","Provision":"{{ provisionby }}"}'
@@ -29,6 +30,11 @@
            wait=true
       register: ec2_info
 
+    - name: Set Instance volume size
+      ec2_vol: 
+           instance= {{ item.id }}
+           volume_size={{ disk_vols }}
+
     - name: Add new instances to host group
       add_host: hostname={{ item.public_ip }} groupname=launched
       with_items: ec2.instances
@@ -36,9 +42,3 @@
     - name: Wait for SSH to come up
       wait_for: host={{ item.public_dns_name }} port=22 delay=60 timeout=320 state=started
       with_items: ec2.instances
-
-    - name: Associate Elastic IP to instances
-      ec2_eip: device_id= {{ instance_ids }}
-       region={{ region }}
-       in_vpc=yes
-      when: ec2launch.elastic_ips
